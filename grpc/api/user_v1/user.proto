@@ -9,8 +9,8 @@ import "google/protobuf/wrappers.proto";
 option go_package = "github.com/bogdanove/auth/pkg/user_v1;user_v1";
 
 service UserV1 {
-  rpc Create(CreateRequest) returns (CreateResponse);
-  rpc Get(GetRequest) returns (GetResponse);
+  rpc CreateChat(CreateRequest) returns (CreateResponse);
+  rpc GetCh(GetRequest) returns (GetResponse);
   rpc Update(UpdateRequest) returns (google.protobuf.Empty);
   rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
 }
