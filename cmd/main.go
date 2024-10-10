@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"flag"
 	"log"
 	"net"
 	"time"
 
+	"github.com/bogdanove/auth/internal/config"
+	"github.com/bogdanove/auth/internal/config/env"
 	"github.com/brianvoe/gofakeit"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -16,23 +19,52 @@ import (
 	"github.com/bogdanove/auth/pkg/user_v1"
 )
 
-const grpcPort = 50051
+var configPath string
+
+func init() {
+	flag.StringVar(&configPath, "config-path", ".env", "path to config file")
+}
 
 type server struct {
 	user_v1.UnimplementedUserV1Server
+	pool *pgxpool.Pool
 }
 
 func main() {
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	flag.Parse()
+	ctx := context.Background()
+
+	// Считываем переменные окружения
+	err := config.Load(configPath)
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	grpcConfig, err := env.NewGRPCConfig()
+	if err != nil {
+		log.Fatalf("failed to get grpc config: %v", err)
+	}
+
+	pgConfig, err := env.NewPGConfig()
+	if err != nil {
+		log.Fatalf("failed to get pg config: %v", err)
+	}
+
+	listen, err := net.Listen("tcp", grpcConfig.Address())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	// Создаем пул соединений с базой данных
+	pool, err := pgxpool.Connect(ctx, pgConfig.DSN())
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer pool.Close()
+
 	s := grpc.NewServer()
-
 	reflection.Register(s)
-
-	user_v1.RegisterUserV1Server(s, &server{})
+	user_v1.RegisterUserV1Server(s, &server{pool: pool})
 
 	log.Printf("server listening at: %v", listen.Addr())
 
