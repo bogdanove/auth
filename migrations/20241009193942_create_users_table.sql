@@ -1,5 +1,5 @@
 -- +goose Up
-create table auth
+create table users
 (
     id         serial primary key,
     name       varchar   not null,
@@ -10,4 +10,4 @@ create table auth
 );
 
 -- +goose Down
-drop table auth;
+drop table users;

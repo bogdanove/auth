@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"log"
 	"net"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/bogdanove/auth/internal/config"
 	"github.com/bogdanove/auth/internal/config/env"
-	"github.com/brianvoe/gofakeit"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -73,44 +74,113 @@ func main() {
 	}
 }
 
-// Create - создание нового пользователя в системе
-func (s *server) Create(_ context.Context, req *user_v1.CreateRequest) (*user_v1.CreateResponse, error) {
+// CreateUser - создание нового пользователя в системе
+func (s *server) CreateUser(ctx context.Context, req *user_v1.CreateRequest) (*user_v1.CreateResponse, error) {
 	log.Printf("start creating new user with name: %s", req.GetUserInfo().GetName())
 
-	id := gofakeit.Int64()
+	queryAddUsers, args, err := sq.Insert("users").
+		PlaceholderFormat(sq.Dollar).
+		Columns("name", "email", "role").
+		Values(req.GetUserInfo().GetName(), req.GetUserInfo().GetEmail(),
+			req.GetUserInfo().GetRole()).
+		Suffix("RETURNING id").ToSql()
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+		return nil, err
+	}
 
-	log.Printf("new user was created with id: %d", id)
+	var userID int64
+	err = s.pool.QueryRow(ctx, queryAddUsers, args...).Scan(&userID)
+	if err != nil {
+		log.Printf("failed to insert user: %v", err)
+		return nil, err
+	}
+
+	log.Printf("new user was created with id: %d", userID)
 
 	return &user_v1.CreateResponse{
-		Id: id,
+		Id: userID,
 	}, nil
 }
 
-// Get - получение информации о пользователе по его идентификатору
-func (s *server) Get(_ context.Context, req *user_v1.GetRequest) (*user_v1.GetResponse, error) {
+// GetUser - получение информации о пользователе по его идентификатору
+func (s *server) GetUser(ctx context.Context, req *user_v1.GetRequest) (*user_v1.GetResponse, error) {
 	log.Printf("receiving user with id: %d", req.GetId())
+
+	query, args, err := sq.Select("id", "name", "email", "role", "created_at", "updated_at").
+		From("users").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"id": req.GetId()}).
+		Limit(1).ToSql()
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+		return nil, err
+	}
+
+	var id int64
+	var name, email, role string
+	var createdAt time.Time
+	var updatedAt sql.NullTime
+
+	err = s.pool.QueryRow(ctx, query, args...).Scan(&id, &name, &email, &role, &createdAt, &updatedAt)
+	if err != nil {
+		log.Printf("failed to select user: %v", err)
+		return nil, err
+	}
 
 	return &user_v1.GetResponse{
 		User: &user_v1.User{
-			Id:        req.GetId(),
-			Name:      gofakeit.Name(),
-			Email:     gofakeit.Email(),
-			Role:      user_v1.Role_USER,
-			CreatedAt: timestamppb.New(time.Now()),
+			Id:        id,
+			Name:      name,
+			Email:     email,
+			Role:      user_v1.Role(user_v1.Role_value[role]),
+			CreatedAt: timestamppb.New(createdAt),
+			UpdatedAt: timestamppb.New(updatedAt.Time),
 		},
 	}, nil
 }
 
-// Update - обновление информации о пользователе по его идентификатору
-func (s *server) Update(_ context.Context, req *user_v1.UpdateRequest) (*emptypb.Empty, error) {
+// UpdateUser - обновление информации о пользователе по его идентификатору
+func (s *server) UpdateUser(ctx context.Context, req *user_v1.UpdateRequest) (*emptypb.Empty, error) {
 	log.Printf("updating user with id: %d", req.GetId())
+
+	query, args, err := sq.Update("users").
+		PlaceholderFormat(sq.Dollar).
+		Set("name", req.UpdateUserInfo.GetName().Value).
+		Set("role", req.UpdateUserInfo.GetRole()).
+		Set("updated_at", time.Now()).
+		Where(sq.Eq{"id": req.GetId()}).ToSql()
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+		return nil, err
+	}
+
+	_, err = s.pool.Exec(ctx, query, args...)
+	if err != nil {
+		log.Printf("failed to update user: %v", err)
+		return nil, err
+	}
 
 	return &emptypb.Empty{}, nil
 }
 
-// Delete - удаление пользователя из системы по его идентификатору
-func (s *server) Delete(_ context.Context, req *user_v1.DeleteRequest) (*emptypb.Empty, error) {
+// DeleteUser - удаление пользователя из системы по его идентификатору
+func (s *server) DeleteUser(ctx context.Context, req *user_v1.DeleteRequest) (*emptypb.Empty, error) {
 	log.Printf("deleting user with id: %d", req.GetId())
+
+	queryDeleteUser, args, err := sq.Delete("users").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"id": req.GetId()}).ToSql()
+	if err != nil {
+		log.Printf("failed to build query: %v", err)
+		return nil, err
+	}
+
+	_, err = s.pool.Exec(ctx, queryDeleteUser, args...)
+	if err != nil {
+		log.Printf("failed to delete user: %v", err)
+		return nil, err
+	}
 
 	return &emptypb.Empty{}, nil
 }
