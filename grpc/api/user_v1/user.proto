@@ -9,10 +9,10 @@ import "google/protobuf/wrappers.proto";
 option go_package = "github.com/bogdanove/auth/pkg/user_v1;user_v1";
 
 service UserV1 {
-  rpc Create(CreateRequest) returns (CreateResponse);
-  rpc Get(GetRequest) returns (GetResponse);
-  rpc Update(UpdateRequest) returns (google.protobuf.Empty);
-  rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+  rpc CreateUser(CreateRequest) returns (CreateResponse);
+  rpc GetUser(GetRequest) returns (GetResponse);
+  rpc UpdateUser(UpdateRequest) returns (google.protobuf.Empty);
+  rpc DeleteUser(DeleteRequest) returns (google.protobuf.Empty);
 }
 
 enum Role {
