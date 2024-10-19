@@ -8,12 +8,12 @@ on:
 
 env:
   REGISTRY: "cr.selcloud.ru/course"
-  IMAGE_NAME: "auth"
-  CONTAINER_NAME: "auth-container"
-  DB_CONTAINER_NAME: "auth-db-container"
+  IMAGE_NAME: "user"
+  CONTAINER_NAME: "user-container"
+  DB_CONTAINER_NAME: "user-db-container"
   DB_IMAGE_NAME: "postgres:14"
-  IMAGE_MIGRATION_NAME: "auth-migration"
-  CONTAINER_MIGRATION_NAME: "auth-container-migration"
+  IMAGE_MIGRATION_NAME: "user-migration"
+  CONTAINER_MIGRATION_NAME: "user-container-migration"
 
 jobs:
   build-and-test:
