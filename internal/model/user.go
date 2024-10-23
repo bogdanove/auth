@@ -27,6 +27,6 @@ type User struct {
 // UpdateUserInfo - структура для обновления данных пользователя
 type UpdateUserInfo struct {
 	ID   int64
-	Name string
-	Role string
+	Name *string
+	Role *string
 }

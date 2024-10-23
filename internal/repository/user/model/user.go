@@ -5,15 +5,6 @@ import (
 	"time"
 )
 
-// UserInfo - структура запроса на добавление пользователя репо
-type UserInfo struct {
-	Name            string
-	Email           string
-	Password        string
-	PasswordConfirm string
-	Role            string
-}
-
 // User - структура пользователя для бд
 type User struct {
 	ID        int64        `db:"id"`
@@ -24,15 +15,8 @@ type User struct {
 	UpdatedAt sql.NullTime `db:"updated_at"`
 }
 
-// UpdateUserInfo - структура для обновления данных пользователя в бд
-type UpdateUserInfo struct {
-	ID   int64
-	Name string
-	Role string
-}
-
 // UserLog - структура для хранения действий пользователя
 type UserLog struct {
-	UserID int64
+	UserID *int64
 	Action string
 }

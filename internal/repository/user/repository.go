@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+
 	"github.com/bogdanove/auth/internal/client/db"
 	service "github.com/bogdanove/auth/internal/model"
 	"github.com/bogdanove/auth/internal/repository"
@@ -17,7 +18,7 @@ const (
 	usersTableName    = "users"
 	usersLogTableName = "users_log"
 
-	usersIDColumn        = "id"
+	idColumn             = "id"
 	usersNameColumn      = "name"
 	usersEmailColumn     = "email"
 	usersRoleColumn      = "role"
@@ -38,7 +39,7 @@ func NewUserRepository(db db.Client) repository.UserRepository {
 }
 
 // CreateUser - создание нового пользователя в системе
-func (r *userRepo) CreateUser(ctx context.Context, req *model.UserInfo) (int64, error) {
+func (r *userRepo) CreateUser(ctx context.Context, req *service.UserInfo) (int64, error) {
 	log.Printf("start creating new user with name: %s", req.Name)
 
 	queryAddUsers, args, err := sq.Insert(usersTableName).
@@ -70,11 +71,11 @@ func (r *userRepo) CreateUser(ctx context.Context, req *model.UserInfo) (int64, 
 func (r *userRepo) GetUser(ctx context.Context, req int64) (*service.User, error) {
 	log.Printf("receiving user with id: %d", req)
 
-	query, args, err := sq.Select(usersIDColumn, usersNameColumn, usersEmailColumn,
+	query, args, err := sq.Select(idColumn, usersNameColumn, usersEmailColumn,
 		usersRoleColumn, usersCreatedAtColumn, usersUpdatedAtColumn).
 		From(usersTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{usersIDColumn: req}).
+		Where(sq.Eq{idColumn: req}).
 		Limit(1).ToSql()
 	if err != nil {
 		log.Printf("failed to build query: %v", err)
@@ -93,24 +94,29 @@ func (r *userRepo) GetUser(ctx context.Context, req int64) (*service.User, error
 		return nil, err
 	}
 
-	return converter.ToUserFromRepo(&user), nil
+	result, err := converter.ToUserFromRepo(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // UpdateUser - обновление информации о пользователе по его идентификатору
-func (r *userRepo) UpdateUser(ctx context.Context, req *model.UpdateUserInfo) error {
+func (r *userRepo) UpdateUser(ctx context.Context, req *service.UpdateUserInfo) error {
 	log.Printf("updating user with id: %d", req.ID)
 
 	builder := sq.Update(usersTableName).
 		PlaceholderFormat(sq.Dollar).
 		Set(usersUpdatedAtColumn, time.Now())
-	if req.Name != "" {
+	if req.Name != nil {
 		builder = builder.Set(usersNameColumn, req.Name)
 	}
-	if req.Role != "" {
+	if req.Role != nil {
 		builder = builder.Set(usersRoleColumn, req.Role)
 	}
 
-	query, args, err := builder.Where(sq.Eq{usersIDColumn: req.ID}).ToSql()
+	query, args, err := builder.Where(sq.Eq{idColumn: req.ID}).ToSql()
 	if err != nil {
 		log.Printf("failed to build query: %v", err)
 		return err
@@ -136,7 +142,7 @@ func (r *userRepo) DeleteUser(ctx context.Context, req int64) error {
 
 	queryDeleteUser, args, err := sq.Delete(usersTableName).
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{usersIDColumn: req}).ToSql()
+		Where(sq.Eq{idColumn: req}).ToSql()
 	if err != nil {
 		log.Printf("failed to build query: %v", err)
 		return err

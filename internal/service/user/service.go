@@ -6,6 +6,11 @@ import (
 	"github.com/bogdanove/auth/internal/service"
 )
 
+const createAction = "CREATE"
+const updateAction = "UPDATE"
+const deleteAction = "DELETE"
+const getAction = "GET"
+
 type userService struct {
 	userRepository repository.UserRepository
 	txManager      db.TxManager

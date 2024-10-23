@@ -9,8 +9,6 @@ import (
 	"github.com/bogdanove/auth/pkg/user_v1"
 )
 
-const getAction = "GET"
-
 // GetUser - получение информации о пользователе по его идентификатору
 func (s *userService) GetUser(ctx context.Context, id int64) (*user_v1.User, error) {
 	var user *model.User
@@ -21,7 +19,7 @@ func (s *userService) GetUser(ctx context.Context, id int64) (*user_v1.User, err
 			return errTx
 		}
 
-		errTx = s.userRepository.SaveLog(ctx, converter.FromServiceToLogRepo(id, getAction))
+		errTx = s.userRepository.SaveLog(ctx, converter.FromServiceToLogRepo(&id, getAction))
 		if errTx != nil {
 			return errTx
 		}
@@ -33,5 +31,10 @@ func (s *userService) GetUser(ctx context.Context, id int64) (*user_v1.User, err
 		return nil, err
 	}
 
-	return srv.ToPBUserFromService(user), nil
+	result, err := srv.ToPBUserFromService(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

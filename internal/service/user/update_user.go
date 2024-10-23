@@ -7,18 +7,16 @@ import (
 	"github.com/bogdanove/auth/internal/repository/user/converter"
 )
 
-const updateAction = "UPDATE"
-
 // UpdateUser - обновление информации о пользователе по его идентификатору
 func (s *userService) UpdateUser(ctx context.Context, req *model.UpdateUserInfo) error {
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error
-		errTx = s.userRepository.UpdateUser(ctx, converter.FromServiceToUpdateUserInfoRepo(req))
+		errTx = s.userRepository.UpdateUser(ctx, req)
 		if errTx != nil {
 			return errTx
 		}
 
-		errTx = s.userRepository.SaveLog(ctx, converter.FromServiceToLogRepo(req.ID, updateAction))
+		errTx = s.userRepository.SaveLog(ctx, converter.FromServiceToLogRepo(&req.ID, updateAction))
 		if errTx != nil {
 			return errTx
 		}

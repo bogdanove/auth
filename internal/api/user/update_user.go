@@ -11,7 +11,12 @@ import (
 
 // UpdateUser - обновление информации о пользователе по его идентификатору
 func (s *Server) UpdateUser(ctx context.Context, req *user_v1.UpdateRequest) (*emptypb.Empty, error) {
-	err := s.userService.UpdateUser(ctx, converter.ToUpdateUserInfoFromPB(req))
+	info, err := converter.ToUpdateUserInfoFromPB(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.userService.UpdateUser(ctx, info)
 	if err != nil {
 		return nil, err
 	}
