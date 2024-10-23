@@ -10,7 +10,6 @@ import (
 	"github.com/bogdanove/auth/internal/client/db"
 	service "github.com/bogdanove/auth/internal/model"
 	"github.com/bogdanove/auth/internal/repository"
-	"github.com/bogdanove/auth/internal/repository/user/converter"
 	"github.com/bogdanove/auth/internal/repository/user/model"
 )
 
@@ -68,7 +67,7 @@ func (r *userRepo) CreateUser(ctx context.Context, req *service.UserInfo) (int64
 }
 
 // GetUser - получение информации о пользователе по его идентификатору
-func (r *userRepo) GetUser(ctx context.Context, req int64) (*service.User, error) {
+func (r *userRepo) GetUser(ctx context.Context, req int64) (*model.User, error) {
 	log.Printf("receiving user with id: %d", req)
 
 	query, args, err := sq.Select(idColumn, usersNameColumn, usersEmailColumn,
@@ -94,12 +93,7 @@ func (r *userRepo) GetUser(ctx context.Context, req int64) (*service.User, error
 		return nil, err
 	}
 
-	result, err := converter.ToUserFromRepo(&user)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return &user, nil
 }
 
 // UpdateUser - обновление информации о пользователе по его идентификатору

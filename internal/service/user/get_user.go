@@ -4,8 +4,8 @@ import (
 	"context"
 
 	srv "github.com/bogdanove/auth/internal/converter"
-	"github.com/bogdanove/auth/internal/model"
 	"github.com/bogdanove/auth/internal/repository/user/converter"
+	"github.com/bogdanove/auth/internal/repository/user/model"
 	"github.com/bogdanove/auth/pkg/user_v1"
 )
 
@@ -31,7 +31,7 @@ func (s *userService) GetUser(ctx context.Context, id int64) (*user_v1.User, err
 		return nil, err
 	}
 
-	result, err := srv.ToPBUserFromService(user)
+	result, err := srv.ToPBUserFromRepo(user)
 	if err != nil {
 		return nil, err
 	}

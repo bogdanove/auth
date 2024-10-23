@@ -1,14 +1,16 @@
 package converter
 
 import (
-	"github.com/bogdanove/auth/internal/model"
-	pb "github.com/bogdanove/auth/pkg/user_v1"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/bogdanove/auth/internal/model"
+	repo "github.com/bogdanove/auth/internal/repository/user/model"
+	pb "github.com/bogdanove/auth/pkg/user_v1"
 )
 
-// ToPBUserFromService - конвертер информации о пользвателе в структуру протобаф
-func ToPBUserFromService(user *model.User) (*pb.User, error) {
+// ToPBUserFromRepo - конвертер информации о пользвателе в структуру протобаф
+func ToPBUserFromRepo(user *repo.User) (*pb.User, error) {
 	if user == nil {
 		return nil, errors.New("user for convert is nil")
 	}

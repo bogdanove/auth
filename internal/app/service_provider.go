@@ -14,7 +14,6 @@ import (
 	"github.com/bogdanove/auth/internal/repository"
 	userRepo "github.com/bogdanove/auth/internal/repository/user"
 	"github.com/bogdanove/auth/internal/service"
-
 	userService "github.com/bogdanove/auth/internal/service/user"
 )
 
