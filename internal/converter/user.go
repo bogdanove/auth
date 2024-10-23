@@ -1,7 +1,6 @@
 package converter
 
 import (
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/bogdanove/auth/internal/model"
@@ -10,11 +9,7 @@ import (
 )
 
 // ToPBUserFromRepo - конвертер информации о пользвателе в структуру протобаф
-func ToPBUserFromRepo(user *repo.User) (*pb.User, error) {
-	if user == nil {
-		return nil, errors.New("user for convert is nil")
-	}
-
+func ToPBUserFromRepo(user *repo.User) *pb.User {
 	var updatedAt *timestamppb.Timestamp
 	if user.UpdatedAt.Valid {
 		updatedAt = timestamppb.New(user.UpdatedAt.Time)
@@ -27,30 +22,22 @@ func ToPBUserFromRepo(user *repo.User) (*pb.User, error) {
 		Role:      pb.Role(pb.Role_value[user.Role]),
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		UpdatedAt: updatedAt,
-	}, nil
+	}
 }
 
 // ToUserInfoFromPB - конвертер информации о пользователе из протобаф в сервисный слой
-func ToUserInfoFromPB(info *pb.UserInfo) (*model.UserInfo, error) {
-	if info == nil {
-		return nil, errors.New("info for convert is nil")
-	}
-
+func ToUserInfoFromPB(info *pb.UserInfo) *model.UserInfo {
 	return &model.UserInfo{
 		Name:            info.Name,
 		Email:           info.Email,
 		Password:        info.Password,
 		PasswordConfirm: info.PasswordConfirm,
 		Role:            info.Role.String(),
-	}, nil
+	}
 }
 
 // ToUpdateUserInfoFromPB - конвертер обновления информации о пользователе из протобаф в сервисный слой
-func ToUpdateUserInfoFromPB(info *pb.UpdateRequest) (*model.UpdateUserInfo, error) {
-	if info == nil {
-		return nil, errors.New("info for convert is nil")
-	}
-
+func ToUpdateUserInfoFromPB(info *pb.UpdateRequest) *model.UpdateUserInfo {
 	var user = &model.UpdateUserInfo{
 		ID: info.Id,
 	}
@@ -65,5 +52,5 @@ func ToUpdateUserInfoFromPB(info *pb.UpdateRequest) (*model.UpdateUserInfo, erro
 		user.Role = &role
 	}
 
-	return user, nil
+	return user
 }

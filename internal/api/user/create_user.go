@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/bogdanove/auth/internal/converter"
@@ -10,12 +11,11 @@ import (
 
 // CreateUser - создание нового пользователя в системе
 func (s *Server) CreateUser(ctx context.Context, req *user_v1.CreateRequest) (*user_v1.CreateResponse, error) {
-	info, err := converter.ToUserInfoFromPB(req.UserInfo)
-	if err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("request is nil")
 	}
 
-	id, err := s.userService.CreateUser(ctx, info)
+	id, err := s.userService.CreateUser(ctx, converter.ToUserInfoFromPB(req.UserInfo))
 	if err != nil {
 		return nil, err
 	}

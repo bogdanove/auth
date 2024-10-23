@@ -31,10 +31,5 @@ func (s *userService) GetUser(ctx context.Context, id int64) (*user_v1.User, err
 		return nil, err
 	}
 
-	result, err := srv.ToPBUserFromRepo(user)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return srv.ToPBUserFromRepo(user), nil
 }
