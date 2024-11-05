@@ -6,11 +6,11 @@ import (
 	"log"
 	"net"
 
+	"github.com/bogdanove/platform_common/pkg/closer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/bogdanove/auth/internal/closer"
 	"github.com/bogdanove/auth/internal/config"
 	"github.com/bogdanove/auth/pkg/user_v1"
 )

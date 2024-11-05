@@ -4,11 +4,12 @@ import (
 	"context"
 	"log"
 
+	"github.com/bogdanove/platform_common/pkg/closer"
+	"github.com/bogdanove/platform_common/pkg/db"
+	"github.com/bogdanove/platform_common/pkg/db/pg"
+	"github.com/bogdanove/platform_common/pkg/db/transaction"
+
 	server "github.com/bogdanove/auth/internal/api/user"
-	"github.com/bogdanove/auth/internal/client/db"
-	"github.com/bogdanove/auth/internal/client/db/pg"
-	"github.com/bogdanove/auth/internal/client/db/transaction"
-	"github.com/bogdanove/auth/internal/closer"
 	"github.com/bogdanove/auth/internal/config"
 	"github.com/bogdanove/auth/internal/config/env"
 	"github.com/bogdanove/auth/internal/repository"

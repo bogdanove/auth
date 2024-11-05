@@ -6,8 +6,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/bogdanove/platform_common/pkg/db"
 
-	"github.com/bogdanove/auth/internal/client/db"
 	service "github.com/bogdanove/auth/internal/model"
 	"github.com/bogdanove/auth/internal/repository"
 	"github.com/bogdanove/auth/internal/repository/user/model"

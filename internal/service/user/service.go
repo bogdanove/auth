@@ -1,7 +1,8 @@
 package user
 
 import (
-	"github.com/bogdanove/auth/internal/client/db"
+	"github.com/bogdanove/platform_common/pkg/db"
+
 	"github.com/bogdanove/auth/internal/repository"
 	"github.com/bogdanove/auth/internal/service"
 )
